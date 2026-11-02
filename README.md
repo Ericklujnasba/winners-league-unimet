@@ -20,8 +20,23 @@ Prototipo de una app web para la liga de fútbol [Winners League UNIMET](https:/
 | Entrenador | Ve la plantilla de su equipo y reporta lesiones a los organizadores |
 | Jugador | Ve noticias, marcadores y tabla, y apoya a sus equipos y jugadores favoritos |
 
-## Nota sobre los datos
+## Datos en vivo (Supabase)
 
-Esta versión es una demostración: cada persona puede probar los tres roles con el selector **Rol** y lo que cambia se guarda solo en su navegador (`localStorage`). Para compartir marcadores en vivo entre todos los dispositivos hace falta conectar una base de datos (por ejemplo Supabase o Firebase).
+Los datos viven en Supabase y se comparten en tiempo real: cuando un organizador marca un gol, todos los que tengan la app abierta ven el marcador y reciben el aviso.
+
+- **Sin cuenta:** se pueden ver marcadores, tabla, equipos y noticias.
+- **Con cuenta** (botón **Entrar**): se guardan los favoritos, los entrenadores eligen su equipo y reportan lesiones.
+- **Organizadores:** los correos de la tabla `organizadores_autorizados` reciben el rol de organizador al registrarse. Para añadir uno:
+
+```sql
+insert into public.organizadores_autorizados (email) values ('correo@ejemplo.com');
+-- si esa persona ya tenía cuenta:
+update public.perfiles set rol = 'organizador'
+where user_id = (select id from auth.users where email = 'correo@ejemplo.com');
+```
+
+Los permisos se controlan con Row Level Security: inventario, deudas, teléfonos de entrenadores y reportes de lesión solo los leen quienes corresponde, y solo los organizadores pueden editar la liga. La clave que aparece en `index.html` es la clave pública (anon) de Supabase, pensada para ir en el navegador.
+
+Si Supabase no carga, la app pasa a una copia local de prueba que se guarda solo en ese navegador.
 
 Es un solo archivo, `index.html`, sin dependencias de compilación.
